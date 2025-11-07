@@ -103,7 +103,5 @@ public class DataLoader implements CommandLineRunner {
             );
             compraRepository.save(compra);
         }
-
-        System.out.println("✅ Datos de ejemplo cargados correctamente (perfil dev).");
     }
 }
