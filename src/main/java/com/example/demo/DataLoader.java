@@ -6,7 +6,6 @@ import java.util.Random;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 import com.example.demo.model.Compra;
@@ -23,27 +22,28 @@ import com.example.demo.repository.UsuarioRepository;
 import net.datafaker.Faker;
 
 
-@Profile("dev")
 @Component
 public class DataLoader implements CommandLineRunner {
-
-    @Autowired
-    private RolRepository rolRepository;
 
     @Autowired
     private UsuarioRepository usuarioRepository;
 
     @Autowired
+    private RolRepository rolRepository;
+    @Autowired
     private EntradaRepository entradaRepository;
-
     @Autowired
     private CompraRepository compraRepository;
-
     @Autowired
     private ImagenPerfilRepository imagenPerfilRepository;
 
     @Override
     public void run(String... args) throws Exception {
+
+        if (usuarioRepository.count() > 0) {
+            System.out.println("Base de datos ya inicializada. Omitiendo DataLoader.");
+            return;
+        }
 
         Faker faker = new Faker();
         Random random = new Random();
@@ -63,7 +63,7 @@ public class DataLoader implements CommandLineRunner {
         for (int i = 0; i < 5; i++) {
             Usuario usuario = new Usuario();
             usuario.setEmail(faker.internet().emailAddress());
-            usuario.setPassword("123456"); // Simple para pruebas
+            usuario.setPassword("123456");
             usuario.setRol(roles.get(random.nextInt(roles.size())));
             usuarioRepository.save(usuario);
         }
@@ -98,10 +98,10 @@ public class DataLoader implements CommandLineRunner {
             Compra compra = new Compra();
             compra.setUsuario(usuarios.get(random.nextInt(usuarios.size())));
             compra.setFechaCompra(LocalDateTime.now().minusDays(random.nextInt(10)));
-            compra.setEntradas(
-                entradas.subList(0, random.nextInt(entradas.size()))
-            );
+            compra.setEntradas(entradas.subList(0, random.nextInt(entradas.size())));
             compraRepository.save(compra);
         }
+
+        System.out.println("Datos de prueba insertados correctamente.");
     }
 }
