@@ -43,7 +43,10 @@ public class DataLoader implements CommandLineRunner {
     @Override
     public void run(String... args) {
         try {
-            // Evitar duplicar datos si ya hay usuarios creados
+            // Esperar hasta que Hibernate cree las tablas (Render arranca muy rápido)
+            Thread.sleep(5000);
+
+            // Evitar duplicar datos
             if (usuarioRepository.count() > 0) {
                 System.out.println("Base de datos ya inicializada. Omitiendo DataLoader.");
                 return;
@@ -52,16 +55,17 @@ public class DataLoader implements CommandLineRunner {
             Faker faker = new Faker();
             Random random = new Random();
 
-            // ----- ROL -----
+            // ----- ROLES -----
             Rol admin = new Rol();
             admin.setNombre("ADMIN");
             rolRepository.save(admin);
 
-            Rol user = new Rol();
-            user.setNombre("USER");
-            rolRepository.save(user);
+            Rol usuarioRol = new Rol();
+            usuarioRol.setNombre("USUARIO");
+            rolRepository.save(usuarioRol);
 
             List<Rol> roles = rolRepository.findAll();
+            System.out.println("Roles creados: " + roles.size());
 
             // ----- USUARIOS -----
             List<Usuario> usuarios = new ArrayList<>();
@@ -72,6 +76,15 @@ public class DataLoader implements CommandLineRunner {
                 usuario.setRol(roles.get(random.nextInt(roles.size())));
                 usuarios.add(usuarioRepository.save(usuario));
             }
+
+            // Usuario ADMIN fijo
+            Usuario adminUser = new Usuario();
+            adminUser.setEmail("admin@demo.com");
+            adminUser.setPassword("admin123");
+            adminUser.setRol(admin);
+            usuarioRepository.save(adminUser);
+
+            System.out.println("Usuarios creados correctamente.");
 
             // ----- IMÁGENES DE PERFIL -----
             for (Usuario u : usuarios) {
@@ -95,13 +108,14 @@ public class DataLoader implements CommandLineRunner {
                 entradas.add(entradaRepository.save(entrada));
             }
 
+            System.out.println("Entradas generadas correctamente.");
+
             // ----- COMPRAS -----
             for (int i = 0; i < 5; i++) {
                 Compra compra = new Compra();
                 compra.setUsuario(usuarios.get(random.nextInt(usuarios.size())));
                 compra.setFechaCompra(LocalDateTime.now().minusDays(random.nextInt(10)));
 
-                // seleccionar entradas ya persistidas
                 int endIndex = random.nextInt(entradas.size());
                 if (endIndex == 0) endIndex = 1;
                 List<Entrada> seleccionadas = new ArrayList<>(entradas.subList(0, endIndex));
@@ -110,7 +124,8 @@ public class DataLoader implements CommandLineRunner {
                 compraRepository.save(compra);
             }
 
-            System.out.println("Datos de prueba insertados correctamente.");
+            System.out.println("Compras generadas correctamente.");
+            System.out.println("Datos de prueba insertados exitosamente en Render PostgreSQL.");
 
         } catch (Exception e) {
             System.err.println("Error al ejecutar DataLoader: " + e.getMessage());
