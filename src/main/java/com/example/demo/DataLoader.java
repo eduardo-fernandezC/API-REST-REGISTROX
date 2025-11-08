@@ -43,8 +43,9 @@ public class DataLoader implements CommandLineRunner {
     @Override
     public void run(String... args) {
         try {
-            // Esperar hasta que Hibernate cree las tablas (Render arranca muy rápido)
-            Thread.sleep(5000);
+            // Render arranca lento, esperamos a que Hibernate cree las tablas
+            System.out.println("Esperando a que Hibernate inicialice la base de datos...");
+            Thread.sleep(12000); // <-- Aumentado a 12 segundos
 
             // Evitar duplicar datos
             if (usuarioRepository.count() > 0) {
@@ -94,6 +95,8 @@ public class DataLoader implements CommandLineRunner {
                 imagenPerfilRepository.save(img);
             }
 
+            System.out.println("Imágenes de perfil generadas correctamente.");
+
             // ----- ENTRADAS -----
             List<Entrada> entradas = new ArrayList<>();
             for (int i = 0; i < 10; i++) {
@@ -125,10 +128,10 @@ public class DataLoader implements CommandLineRunner {
             }
 
             System.out.println("Compras generadas correctamente.");
-            System.out.println("Datos de prueba insertados exitosamente en Render PostgreSQL.");
+            System.out.println("✅ Datos de prueba insertados exitosamente en Render PostgreSQL.");
 
         } catch (Exception e) {
-            System.err.println("Error al ejecutar DataLoader: " + e.getMessage());
+            System.err.println("❌ Error al ejecutar DataLoader: " + e.getMessage());
             e.printStackTrace();
         }
     }
