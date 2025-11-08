@@ -55,9 +55,9 @@ public class DataLoader implements CommandLineRunner {
             Random random = new Random();
 
             // ----- ROLES -----
-            Rol admin = new Rol();
-            admin.setNombre("ADMIN");
-            rolRepository.save(admin);
+            Rol trabajador = new Rol();
+            trabajador.setNombre("TRABAJADOR");
+            rolRepository.save(trabajador);
 
             Rol usuarioRol = new Rol();
             usuarioRol.setNombre("USUARIO");
@@ -70,11 +70,11 @@ public class DataLoader implements CommandLineRunner {
             List<Usuario> usuarios = new ArrayList<>();
             for (int i = 0; i < 5; i++) {
                 Usuario usuario = new Usuario();
-                // Los ADMIN tendrán correos con dominio @registroX.cl
-                boolean esAdmin = random.nextBoolean();
-                if (esAdmin) {
-                    usuario.setEmail("admin" + i + "@registroX.cl");
-                    usuario.setRol(admin);
+                // Los TRABAJADORES tendrán correos con dominio @registroX.cl
+                boolean esTrabajador = random.nextBoolean();
+                if (esTrabajador) {
+                    usuario.setEmail("trabajador" + i + "@registroX.cl");
+                    usuario.setRol(trabajador);
                 } else {
                     usuario.setEmail(faker.internet().emailAddress());
                     usuario.setRol(usuarioRol);
@@ -83,12 +83,12 @@ public class DataLoader implements CommandLineRunner {
                 usuarios.add(usuarioRepository.save(usuario));
             }
 
-            // Admin fijo
-            Usuario adminUser = new Usuario();
-            adminUser.setEmail("admin@registroX.cl");
-            adminUser.setPassword("admin123");
-            adminUser.setRol(admin);
-            usuarioRepository.save(adminUser);
+            // Trabajador fijo
+            Usuario trabajadorFijo = new Usuario();
+            trabajadorFijo.setEmail("trabajador@registroX.cl");
+            trabajadorFijo.setPassword("trabajador123");
+            trabajadorFijo.setRol(trabajador);
+            usuarioRepository.save(trabajadorFijo);
 
             System.out.println("Usuarios creados correctamente.");
 
@@ -112,7 +112,6 @@ public class DataLoader implements CommandLineRunner {
                 entrada.setEstado("disponible");
                 entrada.setCodigoQR("QR-" + faker.number().digits(6));
                 entrada.setCantidad(faker.number().numberBetween(1, 5));
-                // No se asigna usuario → quedan disponibles
                 entradas.add(entradaRepository.save(entrada));
             }
 
