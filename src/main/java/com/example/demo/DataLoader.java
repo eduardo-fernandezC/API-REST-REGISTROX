@@ -43,11 +43,9 @@ public class DataLoader implements CommandLineRunner {
     @Override
     public void run(String... args) {
         try {
-            // Render arranca lento, esperamos a que Hibernate cree las tablas
             System.out.println("Esperando a que Hibernate inicialice la base de datos...");
-            Thread.sleep(12000); // <-- Aumentado a 12 segundos
+            Thread.sleep(12000);
 
-            // Evitar duplicar datos
             if (usuarioRepository.count() > 0) {
                 System.out.println("Base de datos ya inicializada. Omitiendo DataLoader.");
                 return;
@@ -72,15 +70,22 @@ public class DataLoader implements CommandLineRunner {
             List<Usuario> usuarios = new ArrayList<>();
             for (int i = 0; i < 5; i++) {
                 Usuario usuario = new Usuario();
-                usuario.setEmail(faker.internet().emailAddress());
+                // Los ADMIN tendrán correos con dominio @registroX.cl
+                boolean esAdmin = random.nextBoolean();
+                if (esAdmin) {
+                    usuario.setEmail("admin" + i + "@registroX.cl");
+                    usuario.setRol(admin);
+                } else {
+                    usuario.setEmail(faker.internet().emailAddress());
+                    usuario.setRol(usuarioRol);
+                }
                 usuario.setPassword("123456");
-                usuario.setRol(roles.get(random.nextInt(roles.size())));
                 usuarios.add(usuarioRepository.save(usuario));
             }
 
-            // Usuario ADMIN fijo
+            // Admin fijo
             Usuario adminUser = new Usuario();
-            adminUser.setEmail("admin@demo.com");
+            adminUser.setEmail("admin@registroX.cl");
             adminUser.setPassword("admin123");
             adminUser.setRol(admin);
             usuarioRepository.save(adminUser);
@@ -107,7 +112,7 @@ public class DataLoader implements CommandLineRunner {
                 entrada.setEstado("disponible");
                 entrada.setCodigoQR("QR-" + faker.number().digits(6));
                 entrada.setCantidad(faker.number().numberBetween(1, 5));
-                entrada.setUsuario(usuarios.get(random.nextInt(usuarios.size())));
+                // No se asigna usuario → quedan disponibles
                 entradas.add(entradaRepository.save(entrada));
             }
 
@@ -128,10 +133,10 @@ public class DataLoader implements CommandLineRunner {
             }
 
             System.out.println("Compras generadas correctamente.");
-            System.out.println("✅ Datos de prueba insertados exitosamente en Render PostgreSQL.");
+            System.out.println("Datos de prueba insertados exitosamente.");
 
         } catch (Exception e) {
-            System.err.println("❌ Error al ejecutar DataLoader: " + e.getMessage());
+            System.err.println("Error al ejecutar DataLoader: " + e.getMessage());
             e.printStackTrace();
         }
     }
