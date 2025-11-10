@@ -1,12 +1,11 @@
 package com.example.demo.model;
 
-import java.util.List;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import java.util.List;
 
 @Entity
 @Data
@@ -36,19 +35,12 @@ public class Entrada {
     @Column(nullable = false)
     private int cantidad = 1;
 
-    // Relación con usuario (ya existente)
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "usuario_id")
     private Usuario usuario;
 
+    // ❌ Evitar bucle infinito desde Entrada hacia CompraEntrada
     @OneToMany(mappedBy = "entrada", cascade = CascadeType.ALL)
+    @JsonIgnore
     private List<CompraEntrada> compraEntradas;
-
-
-    // NUEVO: Campo virtual (no existe en la BD, solo para devolver el email)
-    @JsonProperty("usuarioEmail")
-    public String getUsuarioEmail() {
-        // Si el usuario no es nulo, devuelve su email; si no, null
-        return usuario != null ? usuario.getEmail() : null;
-    }
 }

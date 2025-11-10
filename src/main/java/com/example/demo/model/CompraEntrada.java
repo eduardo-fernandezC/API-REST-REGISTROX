@@ -12,8 +12,8 @@ public class CompraEntrada {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Evita que se serialice la compra dentro de la compraEntrada (rompe el ciclo)
-    @ManyToOne(fetch = FetchType.EAGER)
+    // ✅ Evita recursión con Compra
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "compra_id")
     @JsonBackReference
     private Compra compra;

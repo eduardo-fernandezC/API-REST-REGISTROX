@@ -5,7 +5,6 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -26,7 +25,7 @@ public class Compra {
     @JoinColumn(name = "usuario_id", nullable = false)
     private Usuario usuario;
 
-    // ✅ Evita recursión infinita: este lado es el "padre"
+    // ✅ Este lado administra la relación
     @OneToMany(mappedBy = "compra", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JsonManagedReference
     private List<CompraEntrada> compraEntradas;
