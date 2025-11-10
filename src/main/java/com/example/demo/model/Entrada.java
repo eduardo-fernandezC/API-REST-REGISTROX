@@ -1,5 +1,7 @@
 package com.example.demo.model;
 
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -38,6 +40,10 @@ public class Entrada {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "usuario_id")
     private Usuario usuario;
+
+    @OneToMany(mappedBy = "entrada", cascade = CascadeType.ALL)
+    private List<CompraEntrada> compraEntradas;
+
 
     // NUEVO: Campo virtual (no existe en la BD, solo para devolver el email)
     @JsonProperty("usuarioEmail")

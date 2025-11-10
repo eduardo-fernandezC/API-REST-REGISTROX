@@ -32,6 +32,10 @@ public class Compra {
         joinColumns = @JoinColumn(name = "compra_id"),
         inverseJoinColumns = @JoinColumn(name = "entrada_id")
     )
+
+    @OneToMany(mappedBy = "compra", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    private List<CompraEntrada> compraEntradas;
+    
     @JsonIgnoreProperties("compras")
     private List<Entrada> entradas;
 }
