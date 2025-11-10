@@ -4,15 +4,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.example.demo.model.Compra;
 import com.example.demo.service.CompraService;
@@ -29,23 +21,22 @@ public class CompraController {
     private CompraService compraService;
 
     @GetMapping
-@Operation(summary = "Listar todas las compras", description = "Obtiene una lista de todas las compras registradas en el sistema.")
-public ResponseEntity<List<Compra>> findAll() {
-    List<Compra> compras = compraService.findAll();
+    @Operation(summary = "Listar todas las compras", description = "Obtiene una lista de todas las compras registradas en el sistema.")
+    public ResponseEntity<List<Compra>> findAll() {
+        List<Compra> compras = compraService.findAll();
 
-    //Forzar la carga de entradas y usuario antes de devolver el JSON
-    compras.forEach(compra -> {
-        if (compra.getEntradas() != null) compra.getEntradas().size();
-        if (compra.getUsuario() != null) compra.getUsuario().getEmail();
-    });
+        // Forzar carga de relaciones para evitar problemas con lazy loading
+        compras.forEach(compra -> {
+            if (compra.getCompraEntradas() != null) compra.getCompraEntradas().size();
+            if (compra.getUsuario() != null) compra.getUsuario().getEmail();
+        });
 
-    if (compras.isEmpty()) {
-        return ResponseEntity.noContent().build();
+        if (compras.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+
+        return ResponseEntity.ok(compras);
     }
-
-    return ResponseEntity.ok(compras);
-}
-
 
     @GetMapping("/{id}")
     @Operation(summary = "Buscar compra por ID", description = "Obtiene la información de una compra específica por su ID.")

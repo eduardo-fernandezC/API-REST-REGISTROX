@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.model.Compra;
-import com.example.demo.model.Entrada;
+import com.example.demo.model.CompraEntrada;
 import com.example.demo.repository.CompraRepository;
 
 @Service
@@ -24,22 +24,25 @@ public class CompraService {
     }
 
     public Compra save(Compra compra) {
-        // Generar un código QR único para cada entrada si no tiene uno
-        if (compra.getEntradas() != null) {
-            for (Entrada entrada : compra.getEntradas()) {
-                if (entrada.getCodigoQR() == null || entrada.getCodigoQR().isEmpty()) {
-                    String qrGenerado = "QR-" + compra.getUsuario().getId() + "-" + System.currentTimeMillis() + "-" + entrada.getTitulo().hashCode();
-                    entrada.setCodigoQR(qrGenerado);
+        // 🔹 Generar código QR único para cada CompraEntrada
+        if (compra.getCompraEntradas() != null) {
+            for (CompraEntrada ce : compra.getCompraEntradas()) {
+                if (ce.getCodigoQR() == null || ce.getCodigoQR().isEmpty()) {
+                    String qr = "QR-" + compra.getUsuario().getId() + "-" +
+                                System.currentTimeMillis() + "-" +
+                                ce.getEntrada().getTitulo().hashCode();
+                    ce.setCodigoQR(qr);
                 }
 
-                // Establecer el estado inicial como "disponible" si no tiene
-                if (entrada.getEstado() == null || entrada.getEstado().isEmpty()) {
-                    entrada.setEstado("disponible");
+                // Establecer relación bidireccional
+                ce.setCompra(compra);
+
+                if (ce.getEstado() == null || ce.getEstado().isEmpty()) {
+                    ce.setEstado("disponible");
                 }
             }
         }
 
-        // Guardar la compra (esto también guarda las entradas por cascada si está configurado)
         return compraRepository.save(compra);
     }
 
@@ -49,12 +52,10 @@ public class CompraService {
 
     public Compra update(Long id, Compra compra) {
         Compra existing = findById(id);
-        if (existing == null) {
-            return null;
-        }
+        if (existing == null) return null;
 
         existing.setUsuario(compra.getUsuario());
-        existing.setEntradas(compra.getEntradas());
+        existing.setCompraEntradas(compra.getCompraEntradas());
         existing.setFechaCompra(compra.getFechaCompra());
 
         return compraRepository.save(existing);
@@ -62,18 +63,14 @@ public class CompraService {
 
     public Compra patch(Long id, Compra compra) {
         Compra existing = findById(id);
-        if (existing == null) {
-            return null;
-        }
+        if (existing == null) return null;
 
         if (compra.getUsuario() != null) {
             existing.setUsuario(compra.getUsuario());
         }
-
-        if (compra.getEntradas() != null) {
-            existing.setEntradas(compra.getEntradas());
+        if (compra.getCompraEntradas() != null) {
+            existing.setCompraEntradas(compra.getCompraEntradas());
         }
-
         if (compra.getFechaCompra() != null) {
             existing.setFechaCompra(compra.getFechaCompra());
         }

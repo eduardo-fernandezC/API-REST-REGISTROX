@@ -10,6 +10,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
 import com.example.demo.model.Compra;
+import com.example.demo.model.CompraEntrada;
 import com.example.demo.model.Entrada;
 import com.example.demo.model.ImagenPerfil;
 import com.example.demo.model.Rol;
@@ -123,11 +124,20 @@ public class DataLoader implements CommandLineRunner {
                 compra.setUsuario(usuarios.get(random.nextInt(usuarios.size())));
                 compra.setFechaCompra(LocalDateTime.now().minusDays(random.nextInt(10)));
 
+                List<CompraEntrada> compraEntradas = new ArrayList<>();
                 int endIndex = random.nextInt(entradas.size());
-                if (endIndex == 0) endIndex = 1;
-                List<Entrada> seleccionadas = new ArrayList<>(entradas.subList(0, endIndex));
-                compra.setEntradas(seleccionadas);
+                if (endIndex == 0)
+                    endIndex = 1;
+                for (Entrada entrada : entradas.subList(0, endIndex)) {
+                    CompraEntrada ce = new CompraEntrada();
+                    ce.setEntrada(entrada);
+                    ce.setCompra(compra);
+                    ce.setCodigoQR("QR-" + faker.number().digits(8));
+                    ce.setEstado("disponible");
+                    compraEntradas.add(ce);
+                }
 
+                compra.setCompraEntradas(compraEntradas);
                 compraRepository.save(compra);
             }
 

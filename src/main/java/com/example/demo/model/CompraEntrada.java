@@ -1,14 +1,10 @@
 package com.example.demo.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 @Entity
 @Data
-@AllArgsConstructor
-@NoArgsConstructor
 public class CompraEntrada {
 
     @Id
@@ -24,8 +20,8 @@ public class CompraEntrada {
     private Entrada entrada;
 
     @Column(nullable = false, length = 20)
-    private String estado = "disponible"; // disponible / ocupada
+    private String estado = "disponible";
 
-    @Column(name = "codigo_qr", unique = true)
+    @Column(name = "codigo_qr", unique = true, length = 120)
     private String codigoQR;
 }
