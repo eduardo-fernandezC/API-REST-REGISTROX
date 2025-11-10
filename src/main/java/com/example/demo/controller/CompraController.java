@@ -29,14 +29,23 @@ public class CompraController {
     private CompraService compraService;
 
     @GetMapping
-    @Operation(summary = "Listar todas las compras", description = "Obtiene una lista de todas las compras registradas en el sistema.")
-    public ResponseEntity<List<Compra>> findAll() {
-        List<Compra> compras = compraService.findAll();
-        if (compras.isEmpty()) {
-            return ResponseEntity.noContent().build();
-        }
-        return ResponseEntity.ok(compras);
+@Operation(summary = "Listar todas las compras", description = "Obtiene una lista de todas las compras registradas en el sistema.")
+public ResponseEntity<List<Compra>> findAll() {
+    List<Compra> compras = compraService.findAll();
+
+    //Forzar la carga de entradas y usuario antes de devolver el JSON
+    compras.forEach(compra -> {
+        if (compra.getEntradas() != null) compra.getEntradas().size();
+        if (compra.getUsuario() != null) compra.getUsuario().getEmail();
+    });
+
+    if (compras.isEmpty()) {
+        return ResponseEntity.noContent().build();
     }
+
+    return ResponseEntity.ok(compras);
+}
+
 
     @GetMapping("/{id}")
     @Operation(summary = "Buscar compra por ID", description = "Obtiene la información de una compra específica por su ID.")
