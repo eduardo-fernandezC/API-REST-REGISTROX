@@ -95,12 +95,14 @@ public class EntradaController {
 
         Entrada entrada = entradaOpt.get();
 
-        if ("usada".equalsIgnoreCase(entrada.getEstado())) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(Map.of("mensaje", "La entrada ya fue utilizada"));
-        }
+        if ("ocupada".equalsIgnoreCase(entrada.getEstado())) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(Map.of("mensaje", "La entrada ya fue utilizada"));
+    }
 
-        entrada.setEstado("usada");
+    entrada.setEstado("ocupada");
+
+
         entradaRepository.save(entrada);
 
         return ResponseEntity.ok(Map.of("mensaje", "Entrada validada correctamente"));
