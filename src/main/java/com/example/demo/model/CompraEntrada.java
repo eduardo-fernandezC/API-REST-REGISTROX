@@ -1,5 +1,6 @@
 package com.example.demo.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -11,8 +12,10 @@ public class CompraEntrada {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    // Evita que se serialice la compra dentro de la compraEntrada (rompe el ciclo)
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "compra_id")
+    @JsonBackReference
     private Compra compra;
 
     @ManyToOne(fetch = FetchType.EAGER)

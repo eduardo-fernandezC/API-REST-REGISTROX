@@ -1,5 +1,6 @@
 package com.example.demo.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -25,7 +26,8 @@ public class Compra {
     @JoinColumn(name = "usuario_id", nullable = false)
     private Usuario usuario;
 
-    // ✅ RELACIÓN CORRECTA con la nueva entidad CompraEntrada
+    // ✅ Evita recursión infinita: este lado es el "padre"
     @OneToMany(mappedBy = "compra", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @JsonManagedReference
     private List<CompraEntrada> compraEntradas;
 }
