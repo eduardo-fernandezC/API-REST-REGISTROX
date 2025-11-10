@@ -1,8 +1,10 @@
 package com.example.demo.controller;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.model.Entrada;
+import com.example.demo.repository.EntradaRepository;
 import com.example.demo.service.EntradaService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -25,8 +28,13 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @Tag(name = "Entradas", description = "Operaciones relacionadas con las entradas del sistema")
 public class EntradaController {
 
-    @Autowired
-    private EntradaService entradaService;
+    private final EntradaRepository entradaRepository;
+    private final EntradaService entradaService;
+
+    public EntradaController(EntradaRepository entradaRepository, EntradaService entradaService) {
+        this.entradaRepository = entradaRepository;
+        this.entradaService = entradaService;
+    }
 
     @GetMapping
     @Operation(summary = "Listar todas las entradas", description = "Obtiene una lista de todas las entradas disponibles o registradas.")
@@ -52,7 +60,7 @@ public class EntradaController {
     @Operation(summary = "Crear una nueva entrada", description = "Registra una nueva entrada dentro del sistema.")
     public ResponseEntity<Entrada> save(@RequestBody Entrada entrada) {
         Entrada created = entradaService.save(entrada);
-        return ResponseEntity.status(201).body(created);
+        return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
     @PutMapping("/{id}")
@@ -73,6 +81,29 @@ public class EntradaController {
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok(patched);
+    }
+
+    @PatchMapping("/usar/{codigoQR}")
+    @Operation(summary = "Marcar entrada como usada", description = "Valida una entrada por su código QR y la marca como usada.")
+    public ResponseEntity<?> marcarEntradaUsada(@PathVariable String codigoQR) {
+        Optional<Entrada> entradaOpt = entradaRepository.findByCodigoQR(codigoQR);
+
+        if (entradaOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("mensaje", "Entrada no encontrada"));
+        }
+
+        Entrada entrada = entradaOpt.get();
+
+        if ("usada".equalsIgnoreCase(entrada.getEstado())) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("mensaje", "La entrada ya fue utilizada"));
+        }
+
+        entrada.setEstado("usada");
+        entradaRepository.save(entrada);
+
+        return ResponseEntity.ok(Map.of("mensaje", "Entrada validada correctamente"));
     }
 
     @DeleteMapping("/{id}")
