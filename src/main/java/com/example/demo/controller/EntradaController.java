@@ -4,19 +4,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import com.example.demo.model.CompraEntrada;
 import com.example.demo.model.Entrada;
+import com.example.demo.repository.CompraEntradaRepository;
 import com.example.demo.repository.EntradaRepository;
 import com.example.demo.service.EntradaService;
 
@@ -31,11 +26,17 @@ public class EntradaController {
     private final EntradaRepository entradaRepository;
     private final EntradaService entradaService;
 
+    @Autowired
+    private CompraEntradaRepository compraEntradaRepository;
+
     public EntradaController(EntradaRepository entradaRepository, EntradaService entradaService) {
         this.entradaRepository = entradaRepository;
         this.entradaService = entradaService;
     }
 
+    // -----------------------------------------------
+    // LISTAR TODAS
+    // -----------------------------------------------
     @GetMapping
     @Operation(summary = "Listar todas las entradas", description = "Obtiene una lista de todas las entradas disponibles o registradas.")
     public ResponseEntity<List<Entrada>> findAll() {
@@ -46,6 +47,9 @@ public class EntradaController {
         return ResponseEntity.ok(entradas);
     }
 
+    // -----------------------------------------------
+    // BUSCAR POR ID
+    // -----------------------------------------------
     @GetMapping("/{id}")
     @Operation(summary = "Buscar entrada por ID", description = "Obtiene la información de una entrada específica por su ID.")
     public ResponseEntity<Entrada> findById(@PathVariable Long id) {
@@ -56,6 +60,9 @@ public class EntradaController {
         return ResponseEntity.ok(entrada);
     }
 
+    // -----------------------------------------------
+    // CREAR NUEVA ENTRADA
+    // -----------------------------------------------
     @PostMapping
     @Operation(summary = "Crear una nueva entrada", description = "Registra una nueva entrada dentro del sistema.")
     public ResponseEntity<Entrada> save(@RequestBody Entrada entrada) {
@@ -63,51 +70,35 @@ public class EntradaController {
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
-    @PutMapping("/{id}")
-    @Operation(summary = "Actualizar una entrada", description = "Modifica todos los campos de una entrada existente.")
-    public ResponseEntity<Entrada> update(@PathVariable Long id, @RequestBody Entrada entrada) {
-        Entrada updated = entradaService.update(id, entrada);
-        if (updated == null) {
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.ok(updated);
-    }
-
-    @PatchMapping("/{id}")
-    @Operation(summary = "Actualizar parcialmente una entrada", description = "Actualiza algunos campos de una entrada sin modificar los demás.")
-    public ResponseEntity<Entrada> patch(@PathVariable Long id, @RequestBody Entrada entrada) {
-        Entrada patched = entradaService.patch(id, entrada);
-        if (patched == null) {
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.ok(patched);
-    }
-
+    // -----------------------------------------------
+    // PATCH: MARCAR COMO USADA (desde CompraEntrada)
+    // -----------------------------------------------
     @PatchMapping("/usar/{codigoQR}")
     @Operation(summary = "Marcar entrada como usada", description = "Valida una entrada por su código QR y la marca como usada.")
     public ResponseEntity<?> marcarEntradaUsada(@PathVariable String codigoQR) {
-        Optional<Entrada> entradaOpt = entradaRepository.findByCodigoQR(codigoQR);
+        Optional<CompraEntrada> compraEntradaOpt = compraEntradaRepository.findByCodigoQR(codigoQR);
 
-        if (entradaOpt.isEmpty()) {
+        if (compraEntradaOpt.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(Map.of("mensaje", "Entrada no encontrada"));
         }
 
-        Entrada entrada = entradaOpt.get();
+        CompraEntrada compraEntrada = compraEntradaOpt.get();
 
-        if ("ocupada".equalsIgnoreCase(entrada.getEstado())) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(Map.of("mensaje", "La entrada ya fue utilizada"));
-    }
+        if ("ocupada".equalsIgnoreCase(compraEntrada.getEstado())) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("mensaje", "La entrada ya fue utilizada"));
+        }
 
-    entrada.setEstado("ocupada");
-
-
-        entradaRepository.save(entrada);
+        compraEntrada.setEstado("ocupada");
+        compraEntradaRepository.save(compraEntrada);
 
         return ResponseEntity.ok(Map.of("mensaje", "Entrada validada correctamente"));
     }
 
+    // -----------------------------------------------
+    // ELIMINAR ENTRADA
+    // -----------------------------------------------
     @DeleteMapping("/{id}")
     @Operation(summary = "Eliminar una entrada", description = "Elimina una entrada específica del sistema por su ID.")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
