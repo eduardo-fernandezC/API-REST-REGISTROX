@@ -1,9 +1,6 @@
 package com.example.demo.service;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,45 +42,60 @@ public class ImagenPerfilService {
         imagenPerfilRepository.deleteById(id);
     }
 
-    public ImagenPerfil update(Long id, ImagenPerfil imagenPerfil) {
-        ImagenPerfil existing = findById(id);
-        if (existing == null) {
-            return null;
+    public ImagenPerfil update(Long id, ImagenPerfil nuevaImagen) {
+        ImagenPerfil existente = findById(id);
+        if (existente == null) return null;
+
+        existente.setImageUrl(nuevaImagen.getImageUrl());
+        existente.setUsuario(nuevaImagen.getUsuario());
+
+        return imagenPerfilRepository.save(existente);
+    }
+
+    public ImagenPerfil patch(Long id, ImagenPerfil imagenParcial) {
+        ImagenPerfil existente = findById(id);
+        if (existente == null) return null;
+
+        if (imagenParcial.getImageUrl() != null) {
+            existente.setImageUrl(imagenParcial.getImageUrl());
         }
-        existing.setImageUrl(imagenPerfil.getImageUrl());
-        existing.setUsuario(imagenPerfil.getUsuario());
-        return imagenPerfilRepository.save(existing);
+        if (imagenParcial.getUsuario() != null) {
+            existente.setUsuario(imagenParcial.getUsuario());
+        }
+
+        return imagenPerfilRepository.save(existente);
     }
 
     public ImagenPerfil guardarImagen(MultipartFile file, Long usuarioId) throws IOException {
 
-    Usuario usuario = usuarioRepository.findById(usuarioId).orElse(null);
-    if (usuario == null) return null;
-
-    var result = cloudinary.uploader().upload(file.getBytes(),
-            ObjectUtils.asMap("folder", "registrox/perfiles"));
-
-    String url = (String) result.get("secure_url");
-
-    ImagenPerfil imagen = new ImagenPerfil();
-    imagen.setImageUrl(url);
-    imagen.setUsuario(usuario);
-
-    return imagenPerfilRepository.save(imagen);
-}
-
-
-    public ImagenPerfil patch(Long id, ImagenPerfil imagenPerfil) {
-        ImagenPerfil existing = findById(id);
-        if (existing == null) {
+        Usuario usuario = usuarioRepository.findById(usuarioId).orElse(null);
+        if (usuario == null) {
+            System.out.println("ERROR: Usuario con ID " + usuarioId + " no existe.");
             return null;
         }
-        if (imagenPerfil.getImageUrl() != null) {
-            existing.setImageUrl(imagenPerfil.getImageUrl());
+
+        try {
+            var resultado = cloudinary.uploader().upload(
+                    file.getBytes(),
+                    ObjectUtils.asMap(
+                        "folder", "registrox/perfiles",
+                        "resource_type", "image"
+                    )
+            );
+
+            String url = resultado.get("secure_url").toString();
+            System.out.println("✔ Imagen subida correctamente a Cloudinary: " + url);
+
+            ImagenPerfil imagen = new ImagenPerfil();
+            imagen.setImageUrl(url);
+            imagen.setUsuario(usuario);
+
+            return imagenPerfilRepository.save(imagen);
+
+        } catch (Exception e) {
+            System.out.println("ERROR Cloudinary:");
+            e.printStackTrace();
+            return null;
         }
-        if (imagenPerfil.getUsuario() != null) {
-            existing.setUsuario(imagenPerfil.getUsuario());
-        }
-        return imagenPerfilRepository.save(existing);
     }
 }
