@@ -7,5 +7,5 @@ import com.example.demo.model.ImagenPerfil;
 
 @Repository
 public interface ImagenPerfilRepository extends JpaRepository<ImagenPerfil, Long> {
-    
+    ImagenPerfil findByUsuarioId(Long usuarioId);
 }

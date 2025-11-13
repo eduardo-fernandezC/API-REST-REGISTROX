@@ -56,47 +56,70 @@ public class ImagenPerfilService {
         ImagenPerfil existente = findById(id);
         if (existente == null) return null;
 
-        if (imagenParcial.getImageUrl() != null) {
+        if (imagenParcial.getImageUrl() != null)
             existente.setImageUrl(imagenParcial.getImageUrl());
-        }
-        if (imagenParcial.getUsuario() != null) {
+
+        if (imagenParcial.getUsuario() != null)
             existente.setUsuario(imagenParcial.getUsuario());
-        }
 
         return imagenPerfilRepository.save(existente);
     }
 
+    // =======================================================
+    // SUBIR IMAGEN NUEVA (y reemplazar si ya existe)
+    // =======================================================
     public ImagenPerfil guardarImagen(MultipartFile file, Long usuarioId) throws IOException {
 
         Usuario usuario = usuarioRepository.findById(usuarioId).orElse(null);
         if (usuario == null) {
-            System.out.println("ERROR: Usuario con ID " + usuarioId + " no existe.");
             return null;
         }
 
-        try {
-            // SUBIR A CLOUDINARY USANDO EL PRESET
-            var resultado = cloudinary.uploader().upload(
-                    file.getBytes(),
-                    ObjectUtils.asMap(
-                            "upload_preset", "registrox_preset"
-                    )
-            );
+        // verificar si ya tiene una imagen
+        ImagenPerfil existente = imagenPerfilRepository.findByUsuarioId(usuarioId);
 
-            String url = resultado.get("secure_url").toString();
-            System.out.println("✔ Imagen subida correctamente a Cloudinary: " + url);
-
-            // GUARDAR EN BD
-            ImagenPerfil imagen = new ImagenPerfil();
-            imagen.setImageUrl(url);
-            imagen.setUsuario(usuario);
-
-            return imagenPerfilRepository.save(imagen);
-
-        } catch (Exception e) {
-            System.out.println("ERROR Cloudinary:");
-            e.printStackTrace();
-            return null;
+        // si ya existe → borrar imagen anterior en Cloudinary
+        if (existente != null) {
+            String oldPublicId = extraerPublicId(existente.getImageUrl());
+            try {
+                cloudinary.uploader().destroy(oldPublicId, ObjectUtils.emptyMap());
+            } catch (Exception e) {
+                System.out.println("❌ Error al borrar imagen anterior en Cloudinary (no bloquea update)");
+            }
         }
+
+        // SUBIR NUEVA IMAGEN USANDO PRESET
+        var resultado = cloudinary.uploader().upload(
+                file.getBytes(),
+                ObjectUtils.asMap(
+                        "upload_preset", "registrox_preset"
+                )
+        );
+
+        String url = resultado.get("secure_url").toString();
+
+        // si existía → actualizar
+        if (existente != null) {
+            existente.setImageUrl(url);
+            return imagenPerfilRepository.save(existente);
+        }
+
+        // si NO existía → crear nuevo registro
+        ImagenPerfil nueva = new ImagenPerfil();
+        nueva.setImageUrl(url);
+        nueva.setUsuario(usuario);
+
+        return imagenPerfilRepository.save(nueva);
     }
+
+    // =======================================================
+    // EXTRAER PUBLIC_ID DESDE LA URL
+    // =======================================================
+    private String extraerPublicId(String url) {
+        // ejemplo URL:
+        // https://res.cloudinary.com/df185j75k/image/upload/v12345/registrox/perfiles/abcd1234.jpg
+        String sinExtension = url.substring(0, url.lastIndexOf('.'));
+        return sinExtension.substring(sinExtension.lastIndexOf('/') + 1);
+    }
+
 }
