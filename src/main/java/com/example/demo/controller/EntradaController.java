@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.*;
 import com.example.demo.model.CompraEntrada;
 import com.example.demo.model.Entrada;
 import com.example.demo.repository.CompraEntradaRepository;
-import com.example.demo.repository.EntradaRepository;
 import com.example.demo.service.EntradaService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -23,14 +22,12 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @Tag(name = "Entradas", description = "Operaciones relacionadas con las entradas del sistema")
 public class EntradaController {
 
-    private final EntradaRepository entradaRepository;
     private final EntradaService entradaService;
 
     @Autowired
     private CompraEntradaRepository compraEntradaRepository;
 
-    public EntradaController(EntradaRepository entradaRepository, EntradaService entradaService) {
-        this.entradaRepository = entradaRepository;
+    public EntradaController(EntradaService entradaService) {
         this.entradaService = entradaService;
     }
 
