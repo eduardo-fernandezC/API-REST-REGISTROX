@@ -34,9 +34,6 @@ public class EntradaController {
         this.entradaService = entradaService;
     }
 
-    // -----------------------------------------------
-    // LISTAR TODAS
-    // -----------------------------------------------
     @GetMapping
     @Operation(summary = "Listar todas las entradas", description = "Obtiene una lista de todas las entradas disponibles o registradas.")
     public ResponseEntity<List<Entrada>> findAll() {
@@ -47,9 +44,6 @@ public class EntradaController {
         return ResponseEntity.ok(entradas);
     }
 
-    // -----------------------------------------------
-    // BUSCAR POR ID
-    // -----------------------------------------------
     @GetMapping("/{id}")
     @Operation(summary = "Buscar entrada por ID", description = "Obtiene la información de una entrada específica por su ID.")
     public ResponseEntity<Entrada> findById(@PathVariable Long id) {
@@ -60,9 +54,6 @@ public class EntradaController {
         return ResponseEntity.ok(entrada);
     }
 
-    // -----------------------------------------------
-    // CREAR NUEVA ENTRADA
-    // -----------------------------------------------
     @PostMapping
     @Operation(summary = "Crear una nueva entrada", description = "Registra una nueva entrada dentro del sistema.")
     public ResponseEntity<Entrada> save(@RequestBody Entrada entrada) {
@@ -70,9 +61,6 @@ public class EntradaController {
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
-    // -----------------------------------------------
-    // PATCH: MARCAR COMO USADA (desde CompraEntrada)
-    // -----------------------------------------------
     @PatchMapping("/usar/{codigoQR}")
     @Operation(summary = "Marcar entrada como usada", description = "Valida una entrada por su código QR y la marca como usada.")
     public ResponseEntity<?> marcarEntradaUsada(@PathVariable String codigoQR) {
@@ -96,9 +84,6 @@ public class EntradaController {
         return ResponseEntity.ok(Map.of("mensaje", "Entrada validada correctamente"));
     }
 
-    // -----------------------------------------------
-    // ELIMINAR ENTRADA
-    // -----------------------------------------------
     @DeleteMapping("/{id}")
     @Operation(summary = "Eliminar una entrada", description = "Elimina una entrada específica del sistema por su ID.")
     public ResponseEntity<Void> delete(@PathVariable Long id) {

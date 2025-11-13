@@ -25,7 +25,6 @@ public class CompraController {
     public ResponseEntity<List<Compra>> findAll() {
         List<Compra> compras = compraService.findAll();
 
-        // Forzar carga de relaciones para evitar problemas con lazy loading
         compras.forEach(compra -> {
             if (compra.getCompraEntradas() != null) compra.getCompraEntradas().size();
             if (compra.getUsuario() != null) compra.getUsuario().getEmail();
