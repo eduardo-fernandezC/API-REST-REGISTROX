@@ -75,17 +75,18 @@ public class ImagenPerfilService {
         }
 
         try {
+            // SUBIR A CLOUDINARY USANDO EL PRESET
             var resultado = cloudinary.uploader().upload(
                     file.getBytes(),
                     ObjectUtils.asMap(
-                        "folder", "registrox/perfiles",
-                        "resource_type", "image"
+                            "upload_preset", "registrox_preset"
                     )
             );
 
             String url = resultado.get("secure_url").toString();
             System.out.println("✔ Imagen subida correctamente a Cloudinary: " + url);
 
+            // GUARDAR EN BD
             ImagenPerfil imagen = new ImagenPerfil();
             imagen.setImageUrl(url);
             imagen.setUsuario(usuario);

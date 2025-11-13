@@ -13,11 +13,9 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.http.MediaType;
-
 
 import com.example.demo.model.ImagenPerfil;
 import com.example.demo.service.ImagenPerfilService;
@@ -61,19 +59,26 @@ public class ImagenPerfilController {
     }
 
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-public ResponseEntity<ImagenPerfil> upload(
-        @RequestPart("file") MultipartFile file,
-        @RequestParam("usuarioId") Long usuarioId) {
+    public ResponseEntity<?> upload(
+            @RequestParam("file") MultipartFile file,
+            @RequestParam("usuarioId") Long usuarioId) {
 
-    try {
-        ImagenPerfil imagen = imagenPerfilService.guardarImagen(file, usuarioId);
-        return ResponseEntity.status(201).body(imagen);
-    } catch (Exception e) {
-        e.printStackTrace();
-        return ResponseEntity.badRequest().build();
+        try {
+            ImagenPerfil imagen = imagenPerfilService.guardarImagen(file, usuarioId);
+
+            if (imagen == null) {
+                return ResponseEntity
+                        .badRequest()
+                        .body("Error al subir la imagen o usuario no existe");
+            }
+
+            return ResponseEntity.status(201).body(imagen);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.badRequest().body("Error interno del servidor");
+        }
     }
-}
-
 
 
     @PutMapping("/{id}")
