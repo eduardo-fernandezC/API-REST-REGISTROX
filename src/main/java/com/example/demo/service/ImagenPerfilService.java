@@ -84,7 +84,7 @@ public class ImagenPerfilService {
             try {
                 cloudinary.uploader().destroy(oldPublicId, ObjectUtils.emptyMap());
             } catch (Exception e) {
-                System.out.println("❌ Error al borrar imagen anterior en Cloudinary (no bloquea update)");
+                System.out.println("Error al borrar imagen anterior en Cloudinary (no bloquea update)");
             }
         }
 
