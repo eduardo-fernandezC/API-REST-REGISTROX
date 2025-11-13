@@ -10,6 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
 import com.example.demo.model.ImagenPerfil;
 import com.example.demo.model.Usuario;
 import com.example.demo.repository.ImagenPerfilRepository;
@@ -17,6 +19,9 @@ import com.example.demo.repository.UsuarioRepository;
 
 @Service
 public class ImagenPerfilService {
+
+    @Autowired
+    private Cloudinary cloudinary;
 
     @Autowired
     private UsuarioRepository usuarioRepository;
@@ -51,20 +56,21 @@ public class ImagenPerfilService {
     }
 
     public ImagenPerfil guardarImagen(MultipartFile file, Long usuarioId) throws IOException {
+
     Usuario usuario = usuarioRepository.findById(usuarioId).orElse(null);
     if (usuario == null) return null;
 
-    String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
-    Path path = Paths.get("uploads/" + fileName);
-    Files.createDirectories(path.getParent());
-    Files.write(path, file.getBytes());
+    var result = cloudinary.uploader().upload(file.getBytes(),
+            ObjectUtils.asMap("folder", "registrox/perfiles"));
+
+    String url = (String) result.get("secure_url");
 
     ImagenPerfil imagen = new ImagenPerfil();
-    imagen.setImageUrl("https://api-rest-registrox.onrender.com/uploads/" + fileName);
+    imagen.setImageUrl(url);
     imagen.setUsuario(usuario);
 
     return imagenPerfilRepository.save(imagen);
-    }
+}
 
 
     public ImagenPerfil patch(Long id, ImagenPerfil imagenPerfil) {

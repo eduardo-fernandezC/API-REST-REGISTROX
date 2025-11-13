@@ -61,14 +61,13 @@ public class ImagenPerfilController {
     public ResponseEntity<ImagenPerfil> upload(
             @RequestParam("file") MultipartFile file,
             @RequestParam("usuarioId") Long usuarioId) {
-
         try {
             ImagenPerfil imagen = imagenPerfilService.guardarImagen(file, usuarioId);
             return ResponseEntity.status(201).body(imagen);
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();
         }
-    }   
+    } 
 
     @PutMapping("/{id}")
     @Operation(summary = "Actualizar una imagen de perfil", description = "Modifica todos los campos de una imagen de perfil existente.")
