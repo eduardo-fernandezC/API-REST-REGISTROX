@@ -39,7 +39,6 @@ public class Entrada {
     @JoinColumn(name = "usuario_id")
     private Usuario usuario;
 
-    // ❌ Evitar bucle infinito desde Entrada hacia CompraEntrada
     @OneToMany(mappedBy = "entrada", cascade = CascadeType.ALL)
     @JsonIgnore
     private List<CompraEntrada> compraEntradas;

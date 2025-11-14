@@ -12,7 +12,6 @@ public class CompraEntrada {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // ✅ Evita recursión con Compra
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "compra_id")
     @JsonBackReference
