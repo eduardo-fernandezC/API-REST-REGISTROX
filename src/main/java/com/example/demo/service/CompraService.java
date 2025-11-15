@@ -24,7 +24,7 @@ public class CompraService {
     }
 
     public Compra save(Compra compra) {
-        // 🔹 Generar código QR único para cada CompraEntrada
+        // Generar codigo QR unico para cada CompraEntrada
         if (compra.getCompraEntradas() != null) {
             for (CompraEntrada ce : compra.getCompraEntradas()) {
                 if (ce.getCodigoQR() == null || ce.getCodigoQR().isEmpty()) {
@@ -34,7 +34,7 @@ public class CompraService {
                     ce.setCodigoQR(qr);
                 }
 
-                // Establecer relación bidireccional
+                // Establecer relacion bidireccional
                 ce.setCompra(compra);
 
                 if (ce.getEstado() == null || ce.getEstado().isEmpty()) {

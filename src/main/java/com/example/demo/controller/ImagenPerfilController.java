@@ -31,9 +31,6 @@ public class ImagenPerfilController {
     @Autowired
     private ImagenPerfilService imagenPerfilService;
 
-    // =======================================================
-    // GET ALL
-    // =======================================================
     @GetMapping
     @Operation(summary = "Listar todas las imágenes", description = "Obtiene una lista de todas las imágenes de perfil registradas.")
     public ResponseEntity<List<ImagenPerfil>> findAll() {
@@ -44,9 +41,6 @@ public class ImagenPerfilController {
         return ResponseEntity.ok(imagenes);
     }
 
-    // =======================================================
-    // GET BY ID
-    // =======================================================
     @GetMapping("/{id}")
     @Operation(summary = "Buscar imagen por ID", description = "Obtiene la información de una imagen de perfil específica por su ID.")
     public ResponseEntity<ImagenPerfil> findById(@PathVariable Long id) {
@@ -57,9 +51,6 @@ public class ImagenPerfilController {
         return ResponseEntity.ok(imagen);
     }
 
-    // =======================================================
-    // POST NORMAL (JSON)
-    // =======================================================
     @PostMapping
     @Operation(summary = "Crear una imagen manualmente", description = "Crea un registro de imagen de perfil a partir de un objeto JSON (sin archivo).")
     public ResponseEntity<ImagenPerfil> save(@RequestBody ImagenPerfil imagenPerfil) {
@@ -67,9 +58,6 @@ public class ImagenPerfilController {
         return ResponseEntity.status(201).body(created);
     }
 
-    // =======================================================
-    // POST UPLOAD (CON ARCHIVO)
-    // =======================================================
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "Subir o reemplazar imagen de perfil", description = "Sube una imagen real para un usuario específico. Si ya tenía imagen, se actualiza.")
     public ResponseEntity<?> upload(
@@ -91,9 +79,6 @@ public class ImagenPerfilController {
         }
     }
 
-    // =======================================================
-    // PUT COMPLETO
-    // =======================================================
     @PutMapping("/{id}")
     @Operation(summary = "Actualizar una imagen", description = "Modifica todos los campos de una imagen de perfil existente.")
     public ResponseEntity<ImagenPerfil> update(
@@ -107,9 +92,6 @@ public class ImagenPerfilController {
         return ResponseEntity.ok(updated);
     }
 
-    // =======================================================
-    // PATCH PARCIAL
-    // =======================================================
     @PatchMapping("/{id}")
     @Operation(summary = "Actualizar parcialmente una imagen", description = "Actualiza algunos campos de una imagen sin modificar los demás.")
     public ResponseEntity<ImagenPerfil> patch(
@@ -123,9 +105,6 @@ public class ImagenPerfilController {
         return ResponseEntity.ok(patched);
     }
 
-    // =======================================================
-    // DELETE
-    // =======================================================
     @DeleteMapping("/{id}")
     @Operation(summary = "Eliminar una imagen", description = "Elimina una imagen de perfil del sistema por su ID.")
     public ResponseEntity<Void> delete(@PathVariable Long id) {

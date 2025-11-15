@@ -93,7 +93,7 @@ public class DataLoader implements CommandLineRunner {
 
             System.out.println("Usuarios creados correctamente.");
 
-            // ----- IMÁGENES DE PERFIL -----
+            // ----- IMAGENES DE PERFIL -----
             for (Usuario u : usuarios) {
                 ImagenPerfil img = new ImagenPerfil();
                 img.setImageUrl(faker.internet().image());
