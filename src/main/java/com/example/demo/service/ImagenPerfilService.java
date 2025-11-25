@@ -65,9 +65,6 @@ public class ImagenPerfilService {
         return imagenPerfilRepository.save(existente);
     }
 
-    // =======================================================
-    // SUBIR IMAGEN NUEVA (y reemplazar si ya existe)
-    // =======================================================
     public ImagenPerfil guardarImagen(MultipartFile file, Long usuarioId) throws IOException {
 
         Usuario usuario = usuarioRepository.findById(usuarioId).orElse(null);
@@ -75,10 +72,8 @@ public class ImagenPerfilService {
             return null;
         }
 
-        // verificar si ya tiene una imagen
         ImagenPerfil existente = imagenPerfilRepository.findByUsuarioId(usuarioId);
 
-        // si ya existe → borrar imagen anterior en Cloudinary
         if (existente != null) {
             String oldPublicId = extraerPublicId(existente.getImageUrl());
             try {
@@ -88,7 +83,6 @@ public class ImagenPerfilService {
             }
         }
 
-        // SUBIR NUEVA IMAGEN USANDO PRESET
         var resultado = cloudinary.uploader().upload(
                 file.getBytes(),
                 ObjectUtils.asMap(
@@ -98,13 +92,11 @@ public class ImagenPerfilService {
 
         String url = resultado.get("secure_url").toString();
 
-        // si existía → actualizar
         if (existente != null) {
             existente.setImageUrl(url);
             return imagenPerfilRepository.save(existente);
         }
 
-        // si NO existía → crear nuevo registro
         ImagenPerfil nueva = new ImagenPerfil();
         nueva.setImageUrl(url);
         nueva.setUsuario(usuario);
@@ -112,12 +104,7 @@ public class ImagenPerfilService {
         return imagenPerfilRepository.save(nueva);
     }
 
-    // =======================================================
-    // EXTRAER PUBLIC_ID DESDE LA URL
-    // =======================================================
     private String extraerPublicId(String url) {
-        // ejemplo URL:
-        // https://res.cloudinary.com/df185j75k/image/upload/v12345/registrox/perfiles/abcd1234.jpg
         String sinExtension = url.substring(0, url.lastIndexOf('.'));
         return sinExtension.substring(sinExtension.lastIndexOf('/') + 1);
     }
